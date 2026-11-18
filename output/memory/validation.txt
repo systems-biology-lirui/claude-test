@@ -1,0 +1,50 @@
+Memory track: local nested validation, not a leaderboard score.
+3 repetitions of 5 outer folds. Inner selection uses 2 repeats.
+Cross-session validation uses held-out eval-1 calibration trials.
+24 workers; elapsed 62.5 s.
+
+sub-m091_ses-20210608_task-DPA-eval.nwb
+Labeled 158 / predicted 162 / official weight 0.40
+Cue / behavior accuracy: 0.9684 / 0.6561
+Cue / behavior balanced accuracy: 0.9684 / 0.5139
+Mean-rate baseline: 0.9135 / 0.6118
+Candidate models: 267
+Cue views: delay_steps, delay_steps_per_odor, early_late, early_late_per_odor
+Behavior views: raw_mean, last_1s, end_steps, last_1s_per_odor
+Cross-session model weights: 0.00 / 0.00
+Behavior calibration strength: 1.00
+
+sub-m091_ses-20210602_task-DPA-eval-2.nwb
+Labeled 27 / predicted 245 / official weight 0.30
+Cue / behavior accuracy: 0.6543 / 0.5679
+Cue / behavior balanced accuracy: 0.6184 / 0.4510
+Mean-rate baseline: 0.5432 / 0.5679
+Candidate models: 303
+Cue views: start_100ms, raw_early, start_250ms, start_scales
+Behavior views: start_1_5s, start_steps, raw_mean_per_odor, mean_per_odor
+Cross-session model weights: 0.10 / 0.45
+Behavior calibration strength: 0.20
+
+sub-m090_ses-20210527_task-DPA-eval-2.nwb
+Labeled 32 / predicted 288 / official weight 0.15
+Cue / behavior accuracy: 0.6042 / 0.6146
+Cue / behavior balanced accuracy: 0.6042 / 0.5115
+Mean-rate baseline: 0.5625 / 0.5312
+Candidate models: 303
+Cue views: mid, mid_per_odor, raw_mean, raw_mean_per_odor
+Behavior views: pop_bursts, start_100ms, last_250ms, last_500ms
+Cross-session model weights: 0.10 / 0.10
+Behavior calibration strength: 1.00
+
+sub-m095_ses-20210709_task-DPA-eval-2.nwb
+Labeled 32 / predicted 288 / official weight 0.15
+Cue / behavior accuracy: 0.7917 / 0.7083
+Cue / behavior balanced accuracy: 0.7917 / 0.6556
+Mean-rate baseline: 0.7708 / 0.7708
+Candidate models: 303
+Cue views: raw_mean, raw_mean_per_odor, start_500ms, mean
+Behavior views: raw_mean, raw_mean_per_odor, mean, last_1s
+Cross-session model weights: 0.10 / 0.10
+Behavior calibration strength: 1.00
+
+Local weighted accuracy: 0.7121. Mean-rate baseline: 0.6694.

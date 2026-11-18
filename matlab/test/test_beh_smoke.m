@@ -1,0 +1,28 @@
+% Check shape, prior, exact mean-rate decisions, and query-label isolation.
+root = fileparts(fileparts(fileparts(mfilename('fullpath'))));
+addpath(fullfile(root, 'matlab', 'memory'));
+rng(5, 'twister');
+a.id = (1:40).';
+a.delay = 3 + 3*mod(a.id, 2);
+a.y = [mod(a.id, 3) == 0, mod(a.id, 4) ~= 0];
+a.f = single(8*rand(40, 24, 23));
+a.pop = single(rand(40, 12));
+a.dyn = single(rand(40, 18));
+a.reg = repmat("CTX", 24, 3);
+q = a;
+q.id = (41:80).';
+q.y = [];
+c.cal = a;
+c.qry = q;
+c.src = [];
+cfg.seed = 42;
+[s, names] = mem_beh_trials(c, cfg);
+assert(isequal(size(s), [numel(q.id), 10]) && numel(unique(names)) == 10);
+assert(all(isfinite(s) & s >= 0 & s <= 1, 'all'));
+assert(all(s(:, names == "prior") == mean(a.y(:, 2))));
+p = struct('lam', .10, 'rbf', 0, 'rel', 0);
+base = mem_ridge(a.f(:, :, 1), a.y(:, 2), q.f(:, :, 1), p);
+assert(isequal(base >= .5, s(:, names == "mean_raw") >= .5));
+c.qry.y = ~a.y;
+assert(isequal(s, mem_beh_trials(c, cfg)));
+disp('Behavior candidate smoke test passed.');

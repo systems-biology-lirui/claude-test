@@ -1,0 +1,155 @@
+Same outer trial folds: seed 42 x 3, seed 927 x 3, ordered blocks.
+All three local checks use the same original labels.
+Fixed choices came from the pilot runs. Inner policies select inside each outer fold.
+Exported cross-day models use source training and target calibration.
+Policy                       seed1  seed2  blocks  passed  exportable
+v2                           0.7449 0.7427 0.7254 1 1
+inner_behavior               0.7435 0.7404 0.7254 0 1
+inner_both                   0.7439 0.7363 0.7198 0 0
+fixed_behavior               0.7658 0.7639 0.7541 1 1
+early_cue_and_behavior       0.7824 0.7695 0.7708 1 0
+matched_source_and_behavior  0.7824 0.7676 0.7708 1 1
+
+Selected matched_source_and_behavior. Runtime 211.3 s using 24 workers.
+
+Group 1 (weight 0.40, 158 labeled trials)
+Split 1, v2 0.9684 / 0.6561, selected 0.9684 / 0.6646
+  Odor improved 0 worsened 0. Behavior improved 11 worsened 11.
+Split 2, v2 0.9684 / 0.6435, selected 0.9684 / 0.6646
+  Odor improved 0 worsened 0. Behavior improved 14 worsened 9.
+Split 3, v2 0.9620 / 0.6582, selected 0.9620 / 0.6646
+  Odor improved 0 worsened 0. Behavior improved 10 worsened 9.
+Final odor v2, behavior prior
+Independent candidates for output 1 (seed1 / seed2 / blocks):
+  v2                               0.9684 0.9684 0.9620
+  deduplicated_v2                  0.9662 0.9641 0.9620
+  target_only_v2                   0.9662 0.9641 0.9620
+  third_first_lda                  0.9409 0.9325 0.9430
+  thirds_lda                       0.9135 0.9241 0.8797
+  thirds_change_lda                0.7426 0.7637 0.7342
+  onset_thirds_lda                 0.9198 0.9241 0.8861
+  thirds_by_delay_lda              0.9135 0.9241 0.8671
+  thirds_rbf_center                0.7468 0.7363 0.7089
+  thirds_change_rbf_center         0.6308 0.6392 0.5823
+Independent candidates for output 2 (seed1 / seed2 / blocks):
+  v2                               0.6561 0.6435 0.6582
+  prior                            0.6646 0.6646 0.6646
+  mean_raw                         0.6118 0.6076 0.6266
+  mean_sqrt                        0.5907 0.6055 0.5949
+  late_rate                        0.6435 0.6603 0.6329
+  trajectory_rate                  0.6540 0.6498 0.6392
+  population_shape                 0.6308 0.6097 0.6076
+  cue_consistency                  0.6540 0.6414 0.6266
+  cue_conditioned                  0.6519 0.6435 0.6266
+  cue_mean                         0.6498 0.6350 0.6329
+  cue_trajectory                   0.6456 0.6414 0.6329
+
+Group 2 (weight 0.30, 27 labeled trials)
+Split 1, v2 0.6543 / 0.5679, selected 0.7654 / 0.6173
+  Odor improved 7 worsened 0. Behavior improved 8 worsened 4.
+Split 2, v2 0.6543 / 0.5802, selected 0.6790 / 0.6049
+  Odor improved 2 worsened 1. Behavior improved 5 worsened 5.
+Split 3, v2 0.6296 / 0.5926, selected 0.7407 / 0.6667
+  Odor improved 3 worsened 0. Behavior improved 4 worsened 2.
+Final odor early_with_matched_source, behavior mean_sqrt
+Independent candidates for output 1 (seed1 / seed2 / blocks):
+  v2                               0.6543 0.6543 0.6296
+  deduplicated_v2                  0.6420 0.6543 0.6296
+  target_only_v2                   0.6790 0.6420 0.6296
+  third_first_lda                  0.6543 0.5926 0.5556
+  thirds_lda                       0.5926 0.5309 0.5185
+  thirds_change_lda                0.5556 0.5679 0.5185
+  onset_thirds_lda                 0.6173 0.5309 0.4815
+  thirds_by_delay_lda              0.6296 0.5309 0.4815
+  thirds_rbf_center                0.5432 0.4815 0.4444
+  thirds_change_rbf_center         0.5432 0.5432 0.4815
+  early_unit_ridge                 0.7654 0.6914 0.7407
+  early_matched_src0               0.6667 0.6420 0.6296
+  early_matched_src0.25            0.6667 0.6543 0.6296
+  early_matched_src0.5             0.6790 0.6296 0.6296
+  span_matched_src0                0.5926 0.5679 0.4444
+  span_matched_src0.25             0.6173 0.5802 0.5556
+  span_matched_src0.5              0.6296 0.5679 0.5926
+  region_early_centroid_src0       0.6420 0.6914 0.7778
+  region_early_centroid_src0.25    0.6420 0.6914 0.7778
+  region_early_centroid_src0.5     0.6420 0.6914 0.7778
+  contact_early_centroid_src0      0.7284 0.6420 0.5926
+  contact_early_centroid_src0.25   0.7531 0.6173 0.5926
+  contact_early_centroid_src0.5    0.7531 0.5802 0.5926
+  early_with_matched_source        0.7654 0.6790 0.7407
+Independent candidates for output 2 (seed1 / seed2 / blocks):
+  v2                               0.5679 0.5802 0.5926
+  prior                            0.6296 0.6296 0.6296
+  mean_raw                         0.5679 0.5185 0.6667
+  mean_sqrt                        0.6173 0.6049 0.6667
+  late_rate                        0.5309 0.5185 0.4815
+  trajectory_rate                  0.5185 0.5185 0.5926
+  population_shape                 0.7284 0.6914 0.5926
+  cue_consistency                  0.6173 0.6049 0.5185
+  cue_conditioned                  0.5802 0.5926 0.5185
+  cue_mean                         0.6543 0.6667 0.5556
+  cue_trajectory                   0.6296 0.5679 0.5185
+
+Group 3 (weight 0.15, 32 labeled trials)
+Split 1, v2 0.8646 / 0.6250, selected 0.8646 / 0.7188
+  Odor improved 0 worsened 0. Behavior improved 9 worsened 4.
+Split 2, v2 0.8958 / 0.6458, selected 0.8958 / 0.6667
+  Odor improved 0 worsened 0. Behavior improved 7 worsened 6.
+Split 3, v2 0.7188 / 0.5938, selected 0.7188 / 0.6562
+  Odor improved 0 worsened 0. Behavior improved 4 worsened 2.
+Final odor v2, behavior cue_conditioned
+Independent candidates for output 1 (seed1 / seed2 / blocks):
+  v2                               0.8646 0.8958 0.7188
+  deduplicated_v2                  0.8646 0.8958 0.7188
+  target_only_v2                   0.8750 0.8854 0.7812
+  third_first_lda                  0.5312 0.4896 0.4688
+  thirds_lda                       0.5000 0.5729 0.5312
+  thirds_change_lda                0.3542 0.2604 0.3125
+  onset_thirds_lda                 0.5625 0.6458 0.5938
+  thirds_by_delay_lda              0.5208 0.5833 0.5938
+  thirds_rbf_center                0.5104 0.5208 0.5000
+  thirds_change_rbf_center         0.3958 0.3958 0.4375
+Independent candidates for output 2 (seed1 / seed2 / blocks):
+  v2                               0.6250 0.6458 0.5938
+  prior                            0.6562 0.6562 0.6562
+  mean_raw                         0.5312 0.6042 0.5312
+  mean_sqrt                        0.6146 0.6250 0.6562
+  late_rate                        0.5521 0.5729 0.5938
+  trajectory_rate                  0.5833 0.6250 0.6562
+  population_shape                 0.5417 0.5833 0.5312
+  cue_consistency                  0.6979 0.6458 0.6562
+  cue_conditioned                  0.7188 0.6667 0.6562
+  cue_mean                         0.6875 0.6354 0.6250
+  cue_trajectory                   0.6875 0.6354 0.6250
+
+Group 4 (weight 0.15, 32 labeled trials)
+Split 1, v2 0.9583 / 0.7083, selected 0.9583 / 0.7708
+  Odor improved 0 worsened 0. Behavior improved 6 worsened 2.
+Split 2, v2 0.9896 / 0.6042, selected 0.9896 / 0.7604
+  Odor improved 0 worsened 0. Behavior improved 10 worsened 0.
+Split 3, v2 1.0000 / 0.5938, selected 1.0000 / 0.7500
+  Odor improved 0 worsened 0. Behavior improved 6 worsened 1.
+Final odor v2, behavior mean_raw
+Independent candidates for output 1 (seed1 / seed2 / blocks):
+  v2                               0.9583 0.9896 1.0000
+  deduplicated_v2                  0.9583 0.9896 1.0000
+  target_only_v2                   0.9479 0.9688 0.9375
+  third_first_lda                  0.6354 0.6354 0.6562
+  thirds_lda                       0.7396 0.7500 0.5938
+  thirds_change_lda                0.4896 0.4896 0.4375
+  onset_thirds_lda                 0.7188 0.7500 0.7188
+  thirds_by_delay_lda              0.7083 0.7292 0.7188
+  thirds_rbf_center                0.6875 0.6771 0.6562
+  thirds_change_rbf_center         0.5625 0.5208 0.5625
+Independent candidates for output 2 (seed1 / seed2 / blocks):
+  v2                               0.7083 0.6042 0.5938
+  prior                            0.6250 0.6250 0.6250
+  mean_raw                         0.7708 0.7604 0.7500
+  mean_sqrt                        0.7708 0.7500 0.6562
+  late_rate                        0.7396 0.7396 0.6250
+  trajectory_rate                  0.6875 0.6979 0.5312
+  population_shape                 0.5625 0.5417 0.5625
+  cue_consistency                  0.6042 0.5000 0.4062
+  cue_conditioned                  0.5833 0.5312 0.4688
+  cue_mean                         0.6771 0.7083 0.5625
+  cue_trajectory                   0.6042 0.6146 0.5312
