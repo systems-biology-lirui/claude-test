@@ -5,5 +5,5 @@
 
 ## 项目
 - 华为云脑机接口比赛，记忆赛道（DPA 任务，从 delay 期 spike 解码 sample odor 和 behavior）。
-- MATLAB 版本 v1–v3 在 `matlab/`，Python 版本 v4 在 `python/memory_v4/`。
+- MATLAB 版本 v1–v3 在 `matlab/`，Python 版本 v4、v5 在 `python/memory_v4/`、`python/memory_v5/`（v5 为当前最新）。
 - 数据 `player_data.zip` 存在 Git LFS 中。
