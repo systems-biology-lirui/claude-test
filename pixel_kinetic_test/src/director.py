@@ -110,19 +110,19 @@ class Director:
     def camera(self, t):
         """Returns (cam_y, zoom, focus, shake)."""
         cam_y, zoom, focus = 0.0, 1, None
-        if t < 2.0:
-            k = ease_in_out(clamp((t - 0.1) / 1.85))
+        if t < TL.TILT_END + 0.05:
+            k = ease_in_out(clamp((t - 0.1) / (TL.TILT_END - 0.1)))
             cam_y = -440 * (1 - k)
         # close-ups (cut on action)
         if IMP[0] <= t < IMP[0] + 0.75:
             zoom, focus = 2, (136, 252)
         elif IMP[1] <= t < IMP[1] + 0.8:
             zoom, focus = 2, (136, 254)
-        elif 13.5 <= t < 14.95:
-            zoom, focus = 2, (138 + 12 * clamp((t - 14.0) / 0.6), 262)
+        elif IMP[2] - TL.L3_CU_PRE <= t < IMP[2] + 0.95:
+            zoom, focus = 2, (138 + 12 * clamp((t - IMP[2]) / 0.6), 262)
         elif IMP[3] <= t < IMP[3] + 0.47:
             zoom, focus = 2, (146, 268)
-        elif 22.0 <= t < IMP[4] + 8 / 30:
+        elif LVS[4]['slow'][0] <= t < IMP[4] + 8 / 30:
             zoom, focus = 2, (124, 262)
         # launch tilt (follow the subject)
         if IMP[4] + 8 / 30 <= t < TL.FALL_CAM:
@@ -151,7 +151,7 @@ class Director:
 
     # ------------------------------------------------------------ pedestrian
     def beat_bob(self, t):
-        if t >= TL.MUSIC_CUT and t < TL.LAND_T:
+        if IMP[4] <= t < TL.LAND_T:
             return False
         ph = TL.beat_pos(t) % 1.0
         return ph < 0.4
@@ -161,8 +161,8 @@ class Director:
         dw3 = TL.since_impact(t, 2)
         if dw3 >= 0:
             x = PX + 22 * ease_out_cubic(clamp(dw3 / 0.55))
-        if t >= 16.0:
-            x = PX + 22 * (1 - ease_in_out(clamp((t - 16.0) / 0.5)))
+        if t >= LVS[3]['start']:
+            x = PX + 22 * (1 - ease_in_out(clamp((t - LVS[3]['start']) / 0.5)))
         return x
 
     def flight_state(self, t):
@@ -198,7 +198,7 @@ class Director:
                 flashw = True
         # ---- L3 spin + hop + dizzy
         dw3 = TL.since_impact(t, 2)
-        if 0 <= dw3 < 2.2 and t < 16.0:
+        if 0 <= dw3 < 2.2 and t < LVS[3]['start']:
             if dw3 < 0.85:
                 p = ease_out_cubic(dw3 / 0.85)
                 ang = p * 4 * math.pi
@@ -477,7 +477,7 @@ class Director:
         return x
 
     # ------------------------------------------------------------ background traffic (intro only)
-    CAR_T = (1.45, 2.55)
+    CAR_T = TL.CAR_T
 
     def car_draw(self, canvas, t, cam):
         t0, t1 = self.CAR_T
@@ -501,12 +501,12 @@ class Director:
 
     # ------------------------------------------------------------ music notes
     def notes_draw(self, canvas, t, cam):
-        if TL.MUSIC_CUT <= t < TL.LAND_T + 0.2:
+        if IMP[4] <= t < TL.LAND_T + 0.2:
             return
         if t >= TL.FREEZE_T:
             t = TL.FREEZE_T
         w = TL.world_time(t)
-        period = 0.55
+        period = TL.NOTE_PERIOD
         k0 = int(w / period)
         for k in range(k0 - 3, k0 + 1):
             ts = k * period
@@ -527,7 +527,7 @@ class Director:
 
     def dizzy_draw(self, canvas, t, cam):
         dw3 = TL.since_impact(t, 2)
-        if not (0.55 < dw3 < 2.1) or t >= 16.0:
+        if not (0.55 < dw3 < 2.1) or t >= LVS[3]['start']:
             return
         hx = self.ped_x(t) + 11
         hy = PTOP - 3
@@ -547,9 +547,7 @@ class Director:
             dw = TL.since_impact(t, i)
             sz = self.obj[LEVELS[i]['key']].shape[1]
             v = SPEED[i]
-            t_launch = L['impact'] - (CONTACT[i][0] + sz + 4) / v
-            if L['slow']:
-                t_launch -= 0.2
+            t_launch = TL.real_time_of_world(TL.W_IMPACT[i] - (CONTACT[i][0] + sz + 4) / v)
             if not (t0 <= t < t_launch + 0.15):
                 continue
             if int(t * 10) % 2 == 1 and t < t_launch:
@@ -644,7 +642,7 @@ class Director:
                                  thick=1, alpha=1 - age / dur, squash=0.55)
         # dust when L3 lands from hop / L4 body hits the ground / L5 landing
         dw3 = TL.since_impact(t, 2)
-        if 0.45 < dw3 < 1.2 and t < 16:
+        if 0.45 < dw3 < 1.2 and t < LVS[3]['start']:
             fx.draw_dust(canvas, *cam(self.ped_x(t) + 11, FEET), dw3 - 0.45, seed=31)
         dw4 = TL.since_impact(t, 3)
         if 0.3 < dw4 < 1.0:
@@ -717,14 +715,12 @@ class Director:
     def hud_draw(self, canvas, t, zoom):
         sprites = self.hud_sprites
         # intro
-        if t < 2.05:
+        if t < TL.LOCK_T + 0.05:
             hud.title(canvas, t + 0.05, t)
-        if 2.0 <= t < 3.95:
+        if TL.LOCK_T <= t < TL.INTRO_HUD_END:
             box = (PX - 2, PTOP - 4, PX + 23, FEET + 2)
-            if t >= 3.75:
-                pass
-            hud.reticle(canvas, t - 2.0, box, t)
-            hud.subject_card(canvas, t - 2.35, (PX + 4, PTOP + 14), t)
+            hud.reticle(canvas, t - TL.LOCK_T, box, t)
+            hud.subject_card(canvas, t - TL.SUBJECT_T, (PX + 4, PTOP + 14), t)
         # levels
         hide = (t >= IMP[4] + 8 / 30)
         cur_lv = None
@@ -740,13 +736,13 @@ class Director:
             tl = t - card_t0
             slide = clamp(tl / 0.25)
             hud.level_card(canvas, i, tl, sprites, t, slide=slide, typing_speed=sp, compact=(zoom == 2),
-                           hurry=(i == 3 and t < 16.9))
+                           hurry=(i == 3 and t < LVS[3]['start'] + 0.9))
         # KE panel
         kd = self.ke_display(t)
         if kd is not None and zoom == 1 and not hide:
             i, v, frac, done = kd
             ratio = T.level_lines(i)['ratio'] if (done and i > 0) else None
-            hud.ke_panel(canvas, v, frac, i, t, alpha_t=clamp((t - 5.15) / 0.3), ratio_txt=ratio,
+            hud.ke_panel(canvas, v, frac, i, t, alpha_t=clamp((t - TL.count_start(0)) / 0.3), ratio_txt=ratio,
                          flash=(not done))
         # banners
         for i, L in enumerate(LVS[:4]):
@@ -777,7 +773,7 @@ class Director:
         for i in (2, 4):
             s0 = LVS[i]['slow'][0]
             if s0 <= t < IMP[i]:
-                hud.slow_tag(canvas, t)
+                hud.slow_tag(canvas, t, LVS[i]['slow'][1])
         # L5 bell + ANC
         if TL.BELL_T <= t < IMP[4] - 0.05:
             bx, _ = self.ebike_x(t)
@@ -788,20 +784,21 @@ class Director:
             sx = min(sx + 2, W - 60)
             hud.tag(canvas, T.ANC, int(sx), int(sy))
         # result stamps
-        res = [(0, 6.9), (1, 10.9), (2, 15.15), (3, 18.66)]
+        res = [(i, TL.result_time(i)) for i in range(4)]
         for (i, ts) in res:
             nxt = LVS[i + 1]['start'] if i < 3 else TL.WARNING_START
             if ts <= t < nxt - 0.05:
                 stc = 'red'
                 hud.stamp(canvas, LEVELS[i]['result_cn'], LEVELS[i]['result_en'], t - ts, color=stc)
-        if 23.55 <= t < TL.FALL_CAM:
-            hud.stamp(canvas, T.TERMINATED_CN, T.TERMINATED_EN, t - 23.55, color='red', cy=230, angle=-5)
+        if TL.TERMINATED_T <= t < TL.FALL_CAM:
+            hud.stamp(canvas, T.TERMINATED_CN, T.TERMINATED_EN, t - TL.TERMINATED_T, color='red', cy=230, angle=-5)
         # L5 crack overlay
-        if IMP[4] <= t < 23.5:
+        if IMP[4] <= t < TL.CRACK_FADE[1]:
             if self.crack is None:
                 self.crack = fx.make_crack(150, 250)
             prog = clamp((t - IMP[4]) / 0.07 + 0.35)
-            alpha = 1.0 if t < 23.1 else 1 - (t - 23.1) / 0.4
+            c0, c1 = TL.CRACK_FADE
+            alpha = 1.0 if t < c0 else 1 - (t - c0) / (c1 - c0)
             if alpha > 0:
                 lines = self.crack
                 fx.draw_crack(canvas, lines, prog, alpha)

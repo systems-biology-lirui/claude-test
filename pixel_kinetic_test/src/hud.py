@@ -429,11 +429,13 @@ def tag(canvas, s, x, y, bg='cyn', fg='ink', size=12):
     text(canvas, s, x + 3, y + 1, size, color=fg)
 
 
-def slow_tag(canvas, t):
-    gfx.fill_rect(canvas, 8, 132, 70, 13, 'ink', 0.8)
+def slow_tag(canvas, t, rate=0.25):
+    label = f'SLOW ×{rate:.2f}'
+    w = max(70, tx().width(label, 10) + 15)
+    gfx.fill_rect(canvas, 8, 132, w, 13, 'ink', 0.8)
     if int(t * 4) % 2 == 0:
         gfx.blit_mask(canvas, gfx.circle_mask(2), 11, 136, 'red')
-    text(canvas, T.SLOW, 18, 133, 10, color='wht')
+    text(canvas, label, 18, 133, 10, color='wht')
 
 
 def down_arrow(canvas, x, y, col='yel'):

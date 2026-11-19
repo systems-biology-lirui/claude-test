@@ -505,12 +505,12 @@ def build_sfx():
         sfx.add(0.10 + i * 0.05, blip(660 + i * 70, 0.03, 0.05, 0.5), 1.0, -0.4 + i * 0.2)
     for i in range(6):
         sfx.add(0.35 + i * 0.05, blip(990 + i * 80, 0.03, 0.045, 0.5), 1.0, -0.4 + i * 0.16)
-    sfx.add(0.9, whoosh(1.4, 200, 1400, 0.06, seed=31))           # camera tilt air
+    sfx.add(0.9 * TL.TILT_END / 1.95, whoosh(1.4 * TL.TILT_END / 1.95, 200, 1400, 0.06, seed=31))   # camera tilt air
     # lock-on
     for k in range(4):
-        sfx.add(2.0 + k * 0.08, blip(1200 + k * 200, 0.04, 0.06, 0.5), 1.0, 0.2)
-    sfx.add(2.36, blip(2400, 0.08, 0.08, 0.5)); sfx.add(2.45, blip(3200, 0.12, 0.07, 0.5))
-    tick_train(sfx, 2.6, 3.5, 22, 1500, 0.025, -0.4)
+        sfx.add(TL.LOCK_T + k * 0.08, blip(1200 + k * 200, 0.04, 0.06, 0.5), 1.0, 0.2)
+    sfx.add(TL.LOCK_T + 0.36, blip(2400, 0.08, 0.08, 0.5)); sfx.add(TL.LOCK_T + 0.45, blip(3200, 0.12, 0.07, 0.5))
+    tick_train(sfx, TL.SUBJECT_T + 0.25, TL.SUBJECT_T + 1.15, 22, 1500, 0.025, -0.4)
     # ---- per level HUD
     for i, L in enumerate(LV):
         s = TL.CARD_SPEED[i]
@@ -539,9 +539,7 @@ def build_sfx():
         sz = D.obj[physics.LEVELS[i]['key']].shape[1]
         v = SPEED[i]
         # approximate real launch time
-        t_launch = L['impact'] - (CONTACT[i][0] + sz + 4) / v
-        if L['slow']:
-            t_launch -= (L['impact'] - L['slow'][0]) * (1 - L['slow'][1])
+        t_launch = TL.real_time_of_world(TL.W_IMPACT[i] - (CONTACT[i][0] + sz + 4) / v)
         if i < 3:
             sfx.add(t_launch - 0.05, pulse(np.linspace(300, 900, int(0.08 * SR)), 0.08, 0.5) * env(int(0.08 * SR), 0.002, 0.06, 0, 0.01) * 0.06, 1.0, -0.8)
             sfx.add(t_launch, whoosh(L['impact'] - t_launch + 0.05, 800, 3000, 0.12 + 0.05 * i, seed=50 + i), 1.0, -0.6)
@@ -569,7 +567,7 @@ def build_sfx():
                 nn = int(0.04 * SR)
                 sfx.add(tb, sine(f0 * (1 + 0.05 * n_), 0.04) * expdec(nn, 0.01) * g, 1.0, -0.4)
     # background car in the intro
-    sfx.add(1.45, whoosh(1.1, 150, 900, 0.12, seed=120) + lp(noise(1.1, 400, seed=121), 120) * np.sin(np.linspace(0, np.pi, int(1.1 * SR))) * 0.15, 1.0, 0.0)
+    sfx.add(TL.CAR_T[0], whoosh(1.1, 150, 900, 0.12, seed=120) + lp(noise(1.1, 400, seed=121), 120) * np.sin(np.linspace(0, np.pi, int(1.1 * SR))) * 0.15, 1.0, 0.0)
     # L1: "pik"
     t = LV[0]['impact']
     sfx.add(t, sine(2200, 0.05) * expdec(int(0.05 * SR), 0.012) * 0.3, 1.0, -0.1)
@@ -581,7 +579,9 @@ def build_sfx():
     sfx.add(t, thump(90, 50, 0.25, 0.35, 0.07))
     sfx.add(t, hp(noise(0.06, SR, seed=70), 1500) * expdec(int(0.06 * SR), 0.015) * 0.3)
     # L3: slow-mo air + BOOM
-    sfx.add(13.5, lp(noise(0.5, SR, seed=80), 600) * np.linspace(0, 1, int(0.5 * SR)) ** 2 * 0.5, 1.0, -0.3)
+    s0 = LV[2]['slow'][0]
+    sd = LV[2]['impact'] - s0
+    sfx.add(s0, lp(noise(sd, SR, seed=80), 600) * np.linspace(0, 1, int(sd * SR)) ** 2 * 0.5, 1.0, -0.3)
     t = LV[2]['impact']
     sfx.add(t, thump(150, 42, 0.6, 1.1, 0.16))
     sfx.add(t, hp(noise(0.2, SR, seed=81), 800) * expdec(int(0.2 * SR), 0.05) * 0.5)
@@ -610,22 +610,23 @@ def build_sfx():
     hs = LV[3]['hitstop'] / TL.FPS
     sfx.add(t + hs + 0.3, thump(110, 40, 0.3, 0.6, 0.08))                 # body hits the lane
     sfx.add(t + hs + 0.3, lp(noise(0.25, SR, seed=92), 900) * expdec(int(0.25 * SR), 0.06) * 0.3)
-    sfx.add(18.22, blip(900, 0.04, 0.06, 0.5))                              # phone lands
-    sfx.add(18.27, glass(0.35, 0.35, seed=93))                              # screen cracks
-    sfx.add(18.27, thump(400, 150, 0.08, 0.2, 0.02))
+    pi0 = TL.PHONE_INSERT[0]
+    sfx.add(pi0, blip(900, 0.04, 0.06, 0.5))                                # phone lands
+    sfx.add(pi0 + 0.05, glass(0.35, 0.35, seed=93))                         # screen cracks
+    sfx.add(pi0 + 0.05, thump(400, 150, 0.08, 0.2, 0.02))
     up_t = t + hs + 1.12
     n = int(0.28 * SR)
     boing = pulse(220 * (1 + 0.5 * np.sin(np.linspace(0, 10 * np.pi, n)) * np.linspace(1, 0, n)) * np.linspace(1, 2.2, n), 0.28, 0.5)
     sfx.add(up_t, boing * env(n, 0.005, 0.1, 0.6, 0.08) * 0.09)
     sfx.add(t + hs + 1.4, blip(1400, 0.05, 0.08, 0.5)); sfx.add(t + hs + 1.44, blip(2100, 0.06, 0.06, 0.5))
     # result stamps
-    for ts in (6.9, 10.9, 15.15, 18.66):
+    for ts in [TL.result_time(k) for k in range(4)]:
         sfx.add(ts, thump(200, 70, 0.18, 0.45, 0.05))
         sfx.add(ts, hp(noise(0.08, SR, seed=int(ts * 10)), 1200) * expdec(int(0.08 * SR), 0.02) * 0.2)
     # "wah-wah" for NO EFFECT
     for k, f in enumerate([392, 370]):
         n = int(0.22 * SR)
-        sfx.add(7.05 + k * 0.24, pulse(f * (1 - 0.03 * np.linspace(0, 1, n)), 0.22, 0.5) * env(n, 0.01, 0.1, 0.6, 0.06) * 0.06)
+        sfx.add(TL.result_time(0) + 0.15 + k * 0.24, pulse(f * (1 - 0.03 * np.linspace(0, 1, n)), 0.22, 0.5) * env(n, 0.01, 0.1, 0.6, 0.06) * 0.06)
     # ---- L5
     # e-bike motor whine (approach), pitch rises; slows in slow-mo
     t0, t1 = TL.BIKE_ENTER - 0.1, LV[4]['impact']
@@ -633,15 +634,16 @@ def build_sfx():
     n = int(d * SR)
     tt = np.arange(n) / SR + t0
     f = 180 + 60 * np.clip((tt - t0) / 0.5, 0, 1)
-    f = np.where(tt >= 22.0, f * 0.55, f)
+    f = np.where(tt >= LV[4]['slow'][0], f * 0.55, f)
     mot = (pulse(f, d, 0.3) * 0.5 + pulse(f * 2.01, d, 0.5) * 0.25)
     mot = lp(mot, 2500) * (0.5 + 0.5 * np.sin(2 * np.pi * 30 * tt) ** 2) * np.clip((tt - t0) / 0.3, 0, 1) * 0.13
     sfx.add(t0, mot, 1.0, -0.4)
     sfx.add(TL.BELL_T, bell_ring(0.22), 1.0, -0.3)
     sfx.add(TL.ANC_T, blip(880, 0.06, 0.05, 0.5)); sfx.add(TL.ANC_T + 0.07, blip(660, 0.08, 0.05, 0.5))
     # slow-mo: deep air + heartbeat
-    sfx.add(22.0, lp(noise(0.4, SR, seed=100), 400) * np.linspace(0.2, 1, int(0.4 * SR)) * 0.5)
-    sfx.add(22.05, thump(70, 40, 0.2, 0.5, 0.06)); sfx.add(22.25, thump(70, 40, 0.2, 0.45, 0.06))
+    s5 = LV[4]['slow'][0]
+    sfx.add(s5, lp(noise(0.4, SR, seed=100), 400) * np.linspace(0.2, 1, int(0.4 * SR)) * 0.5)
+    sfx.add(s5 + 0.05, thump(70, 40, 0.2, 0.5, 0.06)); sfx.add(s5 + 0.25, thump(70, 40, 0.2, 0.45, 0.06))
     # THE impact
     t = LV[4]['impact']
     sub = thump(95, 30, 2.0, 1.0, 0.55)
@@ -666,9 +668,9 @@ def build_sfx():
     sfx.add(t + hs, whoosh(0.9, 300, 4000, 0.3, seed=104), 1.0, 0.1)
     sfx.add(t + hs + 0.95, twinkle(0.25), 1.0, 0.3)
     # TEST TERMINATED stamp + error buzz
-    sfx.add(23.55, thump(180, 60, 0.25, 0.6, 0.07))
+    sfx.add(TL.TERMINATED_T, thump(180, 60, 0.25, 0.6, 0.07))
     n = int(0.3 * SR)
-    sfx.add(23.6, pulse(110, 0.3, 0.5) * env(n, 0.005, 0.05, 0.8, 0.05) * 0.07)
+    sfx.add(TL.TERMINATED_T + 0.05, pulse(110, 0.3, 0.5) * env(n, 0.005, 0.05, 0.8, 0.05) * 0.07)
     # (24.0 - 24.5 silence)
     sfx.add(TL.FALL_CAM, whoosh(0.5, 1500, 300, 0.07, seed=105))
     # falling whistle
@@ -680,8 +682,8 @@ def build_sfx():
     sfx.add(TL.LAND_T, thump(130, 40, 0.35, 0.85, 0.1))
     sfx.add(TL.LAND_T, lp(noise(0.3, SR, seed=106), 1200) * expdec(int(0.3 * SR), 0.07) * 0.35)
     sfx.add(TL.PHONE_CATCH, blip(1500, 0.04, 0.08, 0.5)); sfx.add(TL.PHONE_CATCH + 0.04, blip(2250, 0.06, 0.06, 0.5))
-    # his headphones leaking music in the silence (tinny, quiet)
-    leak = ['E5', 'A5', 'G5', 'E5', 'D5', 'C5']
+    # his headphones leaking music in the silence (tinny, quiet) - synth cut only (the song plays on)
+    leak = [] if TL.MODE == 'song' else ['E5', 'A5', 'G5', 'E5', 'D5', 'C5']
     for k, nm in enumerate(leak):
         tk = TL.LAND_T + 0.08 + k * 0.08
         if tk >= TL.FREEZE_T:
@@ -708,6 +710,60 @@ def build_ambience():
     g[tt >= TL.FREEZE_T] = 0.25
     g *= np.clip(tt / 1.0, 0, 1)
     amb.add(0.0, base * g)
+
+
+def build_song():
+    """Song mode: the uploaded track is the music bed, delayed by SONG_DELAY so its beats sit on frames."""
+    import subprocess
+    raw = subprocess.run(['ffmpeg', '-v', 'error', '-i', TL.SONG_PATH, '-f', 'f32le', '-ac', '2', '-ar', str(SR), '-'],
+                         capture_output=True, check=True).stdout
+    x = np.frombuffer(raw, np.float32).reshape(-1, 2).astype(np.float64)
+    d = int(round(TL.SONG_DELAY * SR))
+    n = min(len(x), len(music.L) - d)
+    music.L[d:d + n] += x[:n, 0]
+    music.R[d:d + n] += x[:n, 1]
+    print(f'song bed: {len(x) / SR:.2f}s, delayed {1000 * d / SR:.1f} ms')
+
+
+def _smooth(k):
+    k = np.clip(k, 0, 1)
+    return k * k * (3 - 2 * k)
+
+
+def master_song():
+    """Song mode mix: duck the song under each impact (deeper every level) and muffle it in bullet time."""
+    n = len(music.L)
+    tt = np.arange(n) / SR
+    mL, mR = music.L.copy(), music.R.copy()
+    # bullet-time muffle: crossfade to a low-passed copy inside each slow-motion window, snap back on impact
+    for i, fc in ((2, 1800.0), (4, 520.0)):
+        s0, t1 = TL.LV[i]['slow'][0], TL.LV[i]['impact']
+        w = np.zeros(n)
+        m = (tt >= s0) & (tt < t1)
+        w[m] = _smooth((tt[m] - s0) / min(0.25, t1 - s0))
+        if not w.any():
+            continue
+        lpL, lpR = lp(music.L, fc, 4), lp(music.R, fc, 4)
+        mL = mL * (1 - w) + lpL * w
+        mR = mR * (1 - w) + lpR * w
+    # side-chain duck after each impact
+    g = np.ones(n)
+    for i, depth_db, hold, rel in ((0, -2, 0.03, 0.25), (1, -4, 0.05, 0.35), (2, -7, 0.08, 0.55),
+                                   (3, -8, 0.08, 0.6), (4, -11, TL.LV[4]['hitstop'] / TL.FPS, 1.1)):
+        ti = TL.LV[i]['impact']
+        gd = 10 ** (depth_db / 20)
+        m = tt >= ti
+        g[m] *= gd + (1 - gd) * _smooth((tt[m] - ti - hold) / rel)
+    L = mL * g + sfx.L + amb.L * 0.5
+    R = mR * g + sfx.R + amb.R * 0.5
+    x = np.stack([L, R], 1)
+    x = np.tanh(x * 1.1) / np.tanh(1.1)
+    over = signal.resample_poly(x, 4, 1, axis=0)
+    x = x / np.max(np.abs(over)) * 10 ** (-2.0 / 20)
+    fo = int(0.45 * SR)
+    end = int(TL.DURATION * SR)
+    x[end - fo:end] *= np.linspace(1, 0, fo)[:, None]
+    return x[:end]
 
 
 def master():
@@ -759,9 +815,12 @@ def write_wav(path, x):
 
 if __name__ == '__main__':
     out = sys.argv[1] if len(sys.argv) > 1 else 'audio.wav'
-    build_music()
+    if TL.MODE == 'song':
+        build_song()
+    else:
+        build_music()
     build_sfx()
     build_ambience()
-    x = master()
+    x = master_song() if TL.MODE == 'song' else master()
     write_wav(out, x)
     print('wrote', out, x.shape, f'{len(x) / SR:.2f}s')
